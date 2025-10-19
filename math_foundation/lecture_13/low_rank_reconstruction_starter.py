@@ -24,4 +24,3 @@ A = np.array([
 
 # Eigen-decomposition (A should already be symmetric)
 λ, V = eigh(A)  # `eigh` guarantees real symmetric output and orthonormal V
-import pdb; pdb.set_trace()
