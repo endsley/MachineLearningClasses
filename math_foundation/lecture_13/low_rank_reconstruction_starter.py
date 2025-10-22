@@ -24,3 +24,8 @@ A = np.array([
 
 # Eigen-decomposition (A should already be symmetric)
 λ, V = eigh(A)  # `eigh` guarantees real symmetric output and orthonormal V
+Vᵀ = V.T
+Λ = np.diag(λ)
+
+
+# Now you need to remove the trivial eigenvectors and then reconstruct.
