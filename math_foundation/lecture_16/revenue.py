@@ -18,19 +18,19 @@ def grad_R(a, p):
 def optimize_revenue(a = 1, p = 1):
 	while True:
 		[ߜp, ߜa] = grad_R(a, p)
-		if ߜp > 0: p = p + 0.001
-		elif ߜp < 0: p = p - 0.001
+		if ߜp > 0: p = p + 0.00001
+		elif ߜp < 0: p = p - 0.00001
 #
-		if ߜa > 0: a = a + 0.001
-		elif ߜa < 0: a = a - 0.001
+		if ߜa > 0: a = a + 0.00001
+		elif ߜa < 0: a = a - 0.00001
 		#print('a = %.3f, p = %.3f, ߜa = %.3f, ߜp = %.3f'%(a, p, ߜa, ߜp))
-		if np.all(array([ߜp, ߜa]) <= 0):
+		if ߜp < 0.0001 and ߜa < 0.0001: 
+			print(f"Optimal p = %.3f, ߜp = %.3f"%(p, ߜp))
+			print(f"Optimal a = %.3f, ߜa = %.3f"%(a, ߜa))
 			break
 	return [a,p]
 
 # Run
 optimal_advertising, optimal_pricing = optimize_revenue()
 
-print(f"Optimal p = %.3f"%optimal_pricing)
-print(f"Optimal a = %.3f"%optimal_advertising)
 
