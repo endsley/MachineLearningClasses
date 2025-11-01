@@ -2,13 +2,8 @@
 import numpy as np
 from numpy import array
 
-# Define Q, c, and d
-Q = array([[2, 1],
-	 	  [1, 3]])
-c = array([8, 10])
-d = 5
 
-# Gradient of R(x): ∇R(x) = -Qx + c
+# Gradient of R(x): 
 def grad_R(a, p):
 	ߜp = -2*p - a + 8
 	ߜa = -p - 3*a + 10
