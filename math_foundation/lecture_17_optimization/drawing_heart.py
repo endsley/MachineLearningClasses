@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -65,7 +66,7 @@ def two_y_solutions_for_x(x,
 	candidates = []
 	for y0 in inits:
 		y, err = minimize_f2_for_y(x, y0, lr=lr, steps=steps, tol_f=tol_f)
-		candidates.append((y, err))
+		if err < max_err_accept: candidates.append((y, err))
 
 	# Deduplicate by y-value (different initializations can converge to same branch)
 	candidates = unique_by_tolerance(candidates, tol=uniq_tol)
@@ -108,6 +109,7 @@ def sample_heart_points(num_x=400, x_min=-1.4, x_max=1.4):
 			max_err_accept=2e-4
 		)
 		print(x, ys)
+	
 		if len(ys) == 0:
 			continue
 
@@ -123,6 +125,7 @@ def sample_heart_points(num_x=400, x_min=-1.4, x_max=1.4):
 			bot.append((x, ys[0]))
 			top.append((x, ys[-1]))
 
+	import pdb; pdb.set_trace()
 	# Convert to arrays
 	top = np.array(top, dtype=float) if len(top) else np.zeros((0, 2))
 	bot = np.array(bot, dtype=float) if len(bot) else np.zeros((0, 2))
