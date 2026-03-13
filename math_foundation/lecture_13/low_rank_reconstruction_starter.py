@@ -27,5 +27,19 @@ A = np.array([
 Vᵀ = V.T
 Λ = np.diag(λ)
 
+# Which eigenvalue is 0? And therefore, which column of V should you remove?
+print(Λ, '\n\n')
+print(V)
 
 # Now you need to remove the trivial eigenvectors and then reconstruct.
+# The syntax for removing column i of V is 
+# V̄ = np.delete(V, i, axis=1)
+
+
+# The syntax for removing column and row i of Λ is 
+#Λ̃ = np.delete(Λ, i, axis=1)
+#Λ̃ = np.delete(Λ̃, i, axis=0)
+#print(Λ̃)
+
+
+# Now multiply them together V̄Λ̃V̄ᵀ, it should reconstruct the original matrix
