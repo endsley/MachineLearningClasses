@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import space	# checks/installs panda3d + imageio, see space.py
 from direct.showbase.ShowBase import ShowBase
 from panda3d.core import Point3, LineSegs, NodePath, TextNode
 from panda3d.core import LVector3, LPoint3

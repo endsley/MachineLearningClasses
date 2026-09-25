@@ -1,0 +1,9 @@
+# Dependencies for the 3D linear-algebra demos in this folder.
+#
+#   python3 -m pip install -r requirements.txt
+#
+# You do NOT need a package called "direct" -- it is part of panda3d.
+# space.py installs these for you automatically if they are missing.
+panda3d>=1.10.15
+imageio
+numpy

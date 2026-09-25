@@ -1,4 +1,81 @@
 #!/usr/bin/env python
+# --------------------------------------------------------------------------
+# Dependency check -- runs automatically, installs what is missing.
+#
+# Two things trip people up, so this block handles both:
+#   1. `direct` is NOT a package of its own.  It ships inside the panda3d
+#      wheel, so `pip install direct` installs an unrelated project and the
+#      ModuleNotFoundError stays.  You need panda3d.
+#   2. "I already installed it" usually means it went into a DIFFERENT Python
+#      than the one running this file -- VS Code, PyCharm, conda and Jupyter
+#      each pick their own interpreter.  Everything below uses sys.executable,
+#      the interpreter running right now, so that cannot happen.
+#
+# Set PANDA3D_AUTO_INSTALL=0 if you would rather install things yourself.
+# --------------------------------------------------------------------------
+import os
+import subprocess
+import sys
+from importlib.util import find_spec
+
+
+def _missing_packages():
+	"""pip requirements for the modules that cannot be imported right now."""
+	needed = {'panda3d': 'panda3d',		# direct/ lives inside this wheel
+			  'direct': 'panda3d',
+			  'imageio': 'imageio',
+			  'numpy': 'numpy'}
+	missing = []
+	for module, package in needed.items():
+		try:
+			installed = find_spec(module) is not None
+		except (ImportError, ValueError):
+			installed = False
+		if not installed and package not in missing:
+			missing.append(package)
+	return missing
+
+
+def _install(packages):
+	"""Install into the interpreter running this file."""
+	print('Installing missing packages: %s' % ' '.join(packages))
+	print('  into %s\n' % sys.executable)
+	sys.stdout.flush()
+	try:
+		subprocess.check_call([sys.executable, '-m', 'pip', 'install',
+							   '--upgrade'] + packages)
+	except (subprocess.CalledProcessError, OSError) as e:
+		print('\nAutomatic install failed: %s' % e)
+	import importlib
+	importlib.invalidate_caches()
+
+
+_missing = _missing_packages()
+if _missing and os.environ.get('PANDA3D_AUTO_INSTALL', '1') != '0':
+	_install(_missing)
+	_missing = _missing_packages()
+
+if _missing:
+	print('\n' + '-' * 72)
+	print('These 3D demos need packages that are missing from this Python.\n')
+	print('  Missing:     %s' % ' '.join(_missing))
+	print('  Running:     Python %d.%d.%d' % sys.version_info[:3])
+	print('  Interpreter: %s\n' % sys.executable)
+	print('Install them by hand with this exact line:\n')
+	print('    "%s" -m pip install --upgrade %s\n' % (sys.executable,
+													   ' '.join(_missing)))
+	print('In a Jupyter notebook use  %pip install ' + ' '.join(_missing))
+	print('(%pip, not !pip -- it installs into the kernel you are running),')
+	print('then restart the kernel.\n')
+	if sys.version_info >= (3, 14):
+		print('On Python 3.14 you also need a recent pip to see the wheels:\n')
+		print('    "%s" -m pip install --upgrade pip\n' % sys.executable)
+	print('These demos open a real 3D window, so run them on your own')
+	print('computer -- they cannot work in Colab or over a plain SSH login.')
+	print('-' * 72 + '\n')
+	raise SystemExit(1)
+# --------------------------------------------------------------------------
+
 from direct.showbase.ShowBase import ShowBase
 from panda3d.core import Point3, LineSegs, NodePath, TextNode
 from panda3d.core import LVector3, LPoint3
