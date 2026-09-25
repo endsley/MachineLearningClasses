@@ -36,6 +36,7 @@ demo are in [`imgs/`](imgs/) if you only want to see the result.
 | Missing in a Jupyter notebook | Use `%pip install panda3d imageio` (not `!pip` — `%pip` installs into the kernel you are actually running), then restart the kernel. |
 | `No matching distribution found for panda3d` | Usually an old pip that cannot see the current wheels: `python -m pip install --upgrade pip`, then try again. Panda3D supports Python 3.14 from version 1.10.15 onward. |
 | `ModuleNotFoundError: No module named 'space'` | Run the script from inside this folder — the demos import `space.py`, which must sit next to them. |
+| `NameError: name 'X̂' is not defined` in `perspective_shift_rotation_practice.py` | Expected — that file is the practice version with the line left blank for you to fill in. `perspective_shift_rotation.py` is the worked solution. |
 | The window never appears, or an OpenGL error | You are on a machine with no display (see above), or your graphics driver is too old. |
 
 To turn the automatic install off, set `PANDA3D_AUTO_INSTALL=0`.

@@ -11,7 +11,7 @@ class point_interpolation(space):
 		self.end = np.array([[1],[-2],[0.5]], dtype=float)
 
 		self.p = self.load_mesh('Luffy.glb')
-		self.p.setPos(*self.start)
+		self.p.setPos(*self.start.flatten())
 
 		self.direction = self.end - self.start
 		self.accept("m", self.initialize_move)
@@ -29,7 +29,7 @@ class point_interpolation(space):
 		if pcnt > 1: return Task.done
 
 		new_loc = self.start + self.direction*pcnt
-		self.p.set_pos(*new_loc)
+		self.p.set_pos(*new_loc.flatten())
 		return Task.cont		
 
 app = point_interpolation()

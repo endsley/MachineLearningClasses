@@ -36,16 +36,38 @@ def _missing_packages():
 	return missing
 
 
+def _in_virtualenv():
+	return sys.prefix != sys.base_prefix
+
+
+def _pip(arguments):
+	"""One pip attempt.  Returns True if it succeeded."""
+	command = [sys.executable, '-m', 'pip', 'install', '--upgrade'] + arguments
+	print('  ' + ' '.join(command))
+	sys.stdout.flush()
+	try:
+		subprocess.check_call(command)
+		return True
+	except (subprocess.CalledProcessError, OSError) as e:
+		print('\n  that attempt did not work (%s)\n' % e)
+		return False
+
+
 def _install(packages):
 	"""Install into the interpreter running this file."""
 	print('Installing missing packages: %s' % ' '.join(packages))
 	print('  into %s\n' % sys.executable)
 	sys.stdout.flush()
-	try:
-		subprocess.check_call([sys.executable, '-m', 'pip', 'install',
-							   '--upgrade'] + packages)
-	except (subprocess.CalledProcessError, OSError) as e:
-		print('\nAutomatic install failed: %s' % e)
+
+	if not _pip(packages) and not _in_virtualenv():
+		# Linux system Pythons are "externally managed" (PEP 668): pip refuses
+		# to touch them so it cannot break packages the OS installed.  Retry
+		# into the user's own ~/.local instead, which leaves the OS alone.
+		print('This Python belongs to the operating system, which protects it')
+		print('from pip.  Installing into your personal package folder instead.\n')
+		sys.stdout.flush()
+		_pip(['--user', '--break-system-packages'] + packages)
+
 	import importlib
 	importlib.invalidate_caches()
 
@@ -70,6 +92,12 @@ if _missing:
 	if sys.version_info >= (3, 14):
 		print('On Python 3.14 you also need a recent pip to see the wheels:\n')
 		print('    "%s" -m pip install --upgrade pip\n' % sys.executable)
+	if not _in_virtualenv():
+		print('If pip says "externally-managed-environment", your Linux is')
+		print('protecting its own Python.  Make a private one instead:\n')
+		print('    python3 -m venv ~/panda3d-env')
+		print('    ~/panda3d-env/bin/python -m pip install panda3d imageio numpy')
+		print('    ~/panda3d-env/bin/python space.py\n')
 	print('These demos open a real 3D window, so run them on your own')
 	print('computer -- they cannot work in Colab or over a plain SSH login.')
 	print('-' * 72 + '\n')
@@ -82,11 +110,18 @@ from panda3d.core import LVector3, LPoint3
 from panda3d.core import WindowProperties
 from direct.task import Task
 from panda3d.core import GeomVertexReader, Filename
+from panda3d.core import getModelPath
 import imageio
 import math
 import numpy as np
 
 root = None
+
+#	Look for models next to this file, not in whatever folder you happened to
+#	launch from.  VS Code runs scripts from the project root, so without this
+#	'Luffy.glb' and friends are not found.
+getModelPath().appendDirectory(
+	Filename.from_os_specific(os.path.dirname(os.path.abspath(__file__))))
 
 def tuple_vector_to_numpy(tup): 
 	return np.array(tup).reshape(-1, 1)
@@ -294,7 +329,7 @@ class space(ShowBase):
 	def load_mesh(self, path):
 		mesh = self.loader.load_model(Filename.from_os_specific(path))
 		if not mesh:
-			print("Failed to load model:", model_path)
+			print("Failed to load model:", path)
 			return None
 
 		mesh.reparentTo(self.render)
