@@ -11,6 +11,9 @@ class point_interpolation(space):
 		self.end = np.array([[1],[-2],[0.5]], dtype=float)
 
 		self.p = self.load_mesh('Luffy.glb')
+		#	glTF files are Y-up but Panda3D is Z-up, so Luffy loads lying on
+		#	his back.  Pitch him 90 degrees so he stands up along Z.
+		self.p.setP(90)
 		self.p.setPos(*self.start.flatten())
 
 		self.direction = self.end - self.start
