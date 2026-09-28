@@ -230,12 +230,24 @@ class point():
 
 
 
+#	Vectors made with create_vector stay on screen even if no variable holds
+#	them.  A vector used in  M @ v  is released from this set, so its arrow
+#	disappears as soon as nothing refers to it: that is what lets
+#	v = M @ v  move the arrow, while  w = M @ v  shows both.
+_kept_vectors = set()
+
+
 class vector():
+	__array_ufunc__ = None		# lets  M @ v  reach __rmatmul__ instead of numpy
+
 	def __init__(self, render, X, start=(0,0,0), color=(0.7, 0.7, 0, 1), thickness=3):
 		self.X = ensure_tuple(X)
 		self.render = render
 		self.thickness = thickness
+		self.color = color
+		self.removed = True
 		self.draw_line(X, start, color)
+		_kept_vectors.add(self)
 
 	def draw_line(self, pos, start=(0,0,0), color=(0.7, 0.7, 0, 1)):
 		self.lines = LineSegs()
@@ -246,7 +258,8 @@ class vector():
 		self.lines.setThickness(self.thickness)
 
 		self.line_node = NodePath(self.lines.create())
-		self.line_node.reparentTo(render)
+		self.line_node.reparentTo(self.render)
+		self.removed = False
 
 		self.start = tuple_vector_to_numpy(start)
 		self.pos = tuple_vector_to_numpy(pos)
@@ -255,19 +268,35 @@ class vector():
 		return self.pos
 
 	def delete(self):
-		self.line_node.removeNode()
+		if not self.removed:
+			self.line_node.removeNode()
+			self.removed = True
 
-	def redraw(self, pos, start=(0,0,0), color=(0.7, 0.7, 0, 1)):
+	def redraw(self, pos, start=None, color=None):
 		pos = ensure_tuple(pos)
+		start = ensure_tuple(self.start) if start is None else ensure_tuple(start)
+		self.color = self.color if color is None else color
 		self.delete()
-		self.draw_line(pos)
+		self.draw_line(pos, start, self.color)
+
+	def __del__(self):
+		try:
+			self.delete()
+		except Exception:		# Panda3D may already be shut down at exit
+			pass
 
 
 
 	def __rmatmul__(self, other):
-		"""Implements other @ self"""
+		"""M @ v  is the vector M v, drawn in v's colour.  v itself stays
+		on screen only while a variable still refers to it (see _kept_vectors).
+		Use  M @ v.pos  for the plain numpy column instead."""
 		if isinstance(other, np.ndarray):
-			return other @ self.pos  # Right multiplication
+			new = vector(self.render, ensure_tuple(other @ self.pos),
+						 start=ensure_tuple(self.start), color=self.color,
+						 thickness=self.thickness)
+			_kept_vectors.discard(self)
+			return new
 		else:
 			raise TypeError(f"Unsupported type {type(other)} for matrix multiplication")
 
@@ -290,6 +319,7 @@ class space(ShowBase):
 		ShowBase.__init__(self)
 		global root
 		root = self
+		_kept_vectors.clear()		# arrows from an earlier space() are gone
 		self.is_fullscreen = False
 
 		# Disable default camera controls
