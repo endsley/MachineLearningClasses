@@ -37,8 +37,7 @@ class rotating_point(space):
         #                      [0, sin(θ), cos(θ)]])
 
     def rotate_x(self, task):
-        new_loc = dot(self.R, self.v.pos)
-        self.v.redraw(new_loc)
+        self.v = self.R @ self.v
         return Task.cont
 
     def start_recording(self):

@@ -14,37 +14,31 @@ class rotating_point(space):
 
 
 	def rotate_z(self, task):
-		v = self.v
 		θ = π/256
 
 		R = np.array([	[cos(θ), -sin(θ), 0],
 				[sin(θ),  cos(θ), 0],
 				[0,       0,      1]])
-		new_loc = R @ v.pos
-		v.redraw(new_loc)
+		self.v = R @ self.v
 		return Task.cont
 
 	def rotate_y(self, task):
-		v = self.v
 		θ = π/256
 
 		R = np.array([	[cos(θ),  0, sin(θ)],
         				[0,              1, 0            ],
         				[-sin(θ), 0, cos(θ)] ])
-		new_loc = R @ v.pos
-		v.redraw(new_loc)
+		self.v = R @ self.v
 		return Task.cont
 
 	def rotate_x(self, task):
-		v = self.v
 		θ = π/256
 
 		R = np.array([	[1, 0, 0],
 						[0, cos(θ), -sin(θ)],
 						[0, sin(θ), cos(θ)]])
 		
-		new_loc = R @ v.pos
-		v.redraw(new_loc)
+		self.v = R @ self.v
 		return Task.cont
 
 

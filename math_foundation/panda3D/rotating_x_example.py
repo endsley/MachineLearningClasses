@@ -12,13 +12,11 @@ class rotating_point(space):
 		self.taskMgr.add(self.rotate_x, "Rotate")
 
 	def rotate_x(self, task):
-		v = self.v
 		θ = π/60
 		R = np.array([	[1, 0, 0],
 				[0, cos(θ), -sin(θ)],
 				[0, sin(θ), cos(θ)]])
-		new_loc = R @ v.pos
-		v.redraw(new_loc)
+		self.v = R @ self.v
 
 		task.delayTime = 1/30.0
 		return Task.again 	# Runs every 1/40 seconds
